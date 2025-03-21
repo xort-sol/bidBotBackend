@@ -65,43 +65,46 @@ def clean_llm_response(text: str) -> str:
     return cleaned_text
 def create_proposal_prompt(request: ProposalRequest) -> str:
     """
-    Create an optimized prompt for the Groq API based on the request.
+    Create a prompt that generates genuinely human-like proposals.
     
     Args:
         request: ProposalRequest containing job description and parameters
         
     Returns:
-        str: Formatted prompt for the LLM
+        dict: System and user prompts for the LLM
     """
-    system_prompt = "You are an expert freelancer who creates personalized, authentic-sounding proposals that win contracts. Respond ONLY with the final proposal text. Do not include any explanations, introductions, or meta-commentary."
+    # A more casual, authentic system prompt
+    system_prompt = "You are a freelancer quickly typing up a proposal for a job. Write like a real person - be casual, a bit messy, and genuinely human. Don't try to be perfect."
     
     user_prompt = f"""
-    I need a concise, professional proposal for the following job description. Output ONLY the final proposal - no introduction text, no 'here is the proposal', just the raw proposal text.
+    Write a quick proposal for this job as if you're typing it directly into an application form:
 
     [JOB POST]
     {request.job_description}
     [/JOB POST]
 
-    Core Requirements:
-    - Maximum length: 200-250 words (approximately 3 paragraphs)
-    - Write in a {request.tone} tone
-    - Be specific to the job details, not generic
-    - Show expertise through specific approaches
-    - DO NOT include 'Here is the proposal' or similar phrases at the beginning
-    - DO NOT use quotes around the proposal
-    - DO NOT include any meta-commentary before or after the proposal
-
-    Paragraph Structure:
-    - First Paragraph: Open with an insight about a specific challenge related to their project
-    - Second Paragraph: Highlight relevant experience and technical approach
-    - Third Paragraph: Include a question about their needs and suggest a next step
-
-    Human-Like Writing Elements:
-    - Use contractions naturally (I've, you're, doesn't)
-    - Include a specific technical detail that shows advanced knowledge
-    - Avoid generic phrases like "I am writing to express my interest"
+    Make it genuinely human by:
+    - Writing in a {request.tone} style, but inconsistently (start professional, get more casual)
+    - Including 1-2 authentic typos (like teh instead of the) or missing words
+    - Using some incomplete sentences or run-ons where natural
+    - Throwing in personal details that sound real ("worked on something similar last month")
+    - Varying paragraph length significantly (maybe one very short paragraph)
+    - Adding natural thought jumps (change topics mid-paragraph occasionally)
+    - Using 1-2 filler phrases ("anyway", "you know", "actually")
+    - Being specific about your availability ("free Tuesday afternoon")
+    
+    Absolutely avoid:
+    - Three perfectly balanced paragraphs
+    - Starting with a problem-solution structure
+    - Using formal transition words (furthermore, moreover, additionally)
+    - Listing technical skills in sequence
+    - Perfect grammar throughout the entire proposal
+    - Generic closing questions
+    
+    Keep it under 250 words but don't count exactly. Write it in one quick draft without overthinking.
     """
 
+    # Add any additional context from the request
     if request.previous_proposals:
         user_prompt += "\n\nPrevious Proposals:\n"
         for proposal in request.previous_proposals:
@@ -130,7 +133,6 @@ def create_proposal_prompt(request: ProposalRequest) -> str:
         "system": system_prompt,
         "user": user_prompt
     }
-
 
 async def generate_proposal_with_groq(request: ProposalRequest) -> str:
     """
