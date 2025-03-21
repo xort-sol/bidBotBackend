@@ -34,6 +34,31 @@ class ProposalResponse(BaseModel):
     status: str = Field(..., description="Status of the request")
     model_used: str = Field(..., description="Model used for generation")
 
+
+class EditProposalRequest(BaseModel):
+    """Request model for editing an existing proposal."""
+    original_proposal: str = Field(..., description="The original proposal text to be edited")
+    edit_instructions: str = Field(..., description="Specific instructions on how to edit the proposal")
+    job_description: Optional[str] = Field(None, description="Original job description for context")
+    tone: Optional[str] = Field("Same as original", description="Tone for the edited proposal (default keeps original tone)")
+    max_length: Optional[int] = Field(500, description="Maximum length of the edited proposal in tokens")
+    model: Optional[str] = Field(None, description="Model to use for generation (if different from default)")
+    preserve_quirks: Optional[bool] = Field(True, description="Whether to preserve original typos and human quirks")
+    
+    # Additional context fields
+    associated_files: List[str] = Field([], description="List of file URLs or paths associated with the job")
+    job_tags: List[str] = Field([], description="Tags related to the job")
+    job_type: Optional[str] = Field(None, description="Type of job (e.g., 'Fixed Price', 'Hourly')")
+
+
+class EditProposalResponse(BaseModel):
+    """Response model for edited proposal."""
+    original_proposal: str = Field(..., description="Original proposal text")
+    edited_proposal: str = Field(..., description="Edited proposal text")
+    changes_made: List[str] = Field(..., description="Summary of changes made")
+    status: str = Field(..., description="Status of the request")
+    model_used: str = Field(..., description="Model used for generation")
+
 class EstimationResponse(BaseModel):
     time_range: dict = {"min_hours": int, "max_hours": int}
     cost_range: dict = {"min_amount": float, "max_amount": float, "currency": str}
